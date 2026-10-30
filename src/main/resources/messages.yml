@@ -4,7 +4,9 @@ errors:
   no-permission: "&cYou do not have permission to perform this action (&7%permission%&c)."
   players-only: "&cThis command can only be executed by an in-game player."
   player-not-found: "&cPlayer '&f%player%&c' could not be found."
-  invalid-amount: "&cInvalid amount '&f%amount%&c'. Must be a positive whole number."
+  player-not-online: "&cPlayer '&f%player%&c' must be online to receive a Coin gift."
+  cannot-gift-self: "&cYou cannot gift Coins to yourself."
+  invalid-amount: "&cInvalid amount '&f%amount%&c'. Must be a positive number (supports K, M, B such as 100, 1k, 5k, 1m)."
   invalid-id: "&cInvalid identifier '&f%id%&c'. Use only lowercase letters, numbers, hyphens, and underscores."
   category-not-found: "&cCategory '&f%category%&c' does not exist."
   category-already-exists: "&cCategory '&f%category%&c' already exists."
@@ -22,6 +24,10 @@ balance:
   set: "&aSet &f%player%&a's balance to &#FFAA00%balance_raw% %currency%&a."
   insufficient-target: "&c%player% only has %balance_raw% %currency%."
   overflow: "&cOperation rejected: balance would exceed the maximum allowed limit."
+  gift-usage: "&cUsage: /coinshop gift <player> <amount> &7(e.g. /coinshop gift Steve 1k)"
+  gift-insufficient: "&cYou do not have enough Coins! You need &#FFAA00%amount_raw% %currency% &c(you have &f%balance_raw%&c)."
+  gift-sent: "&aYou gifted &#FFAA00%symbol%%amount_formatted% &8(&f%amount_raw% %currency%&8) &ato &f%receiver%&a! Your new balance: &#55FFFF%balance_raw%&a."
+  gift-received: "&aYou received a gift of &#FFAA00%symbol%%amount_formatted% &8(&f%amount_raw% %currency%&8) &afrom &f%sender%&a! Your new balance: &#55FFFF%balance_raw%&a."
 
 shop:
   purchase-success: "&aPurchased &f%amount%x %item% &afor &#FFAA00%symbol%%price_raw% %currency%&a!"

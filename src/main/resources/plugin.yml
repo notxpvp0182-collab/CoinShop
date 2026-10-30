@@ -12,7 +12,7 @@ commands:
   coinshop:
     description: Main CoinShop command
     aliases: [cshop, coins, cs]
-    usage: /coinshop [shop|balance|help|top|history|give|take|set|addcategory|removecategory|addhanditem|edititem|removeitem|editor|reload|validate|info]
+    usage: /coinshop [shop|balance|gift|help|top|history|give|take|set|addcategory|removecategory|addhanditem|edititem|removeitem|editor|reload|validate|info]
 
 permissions:
   coinshop.use:
@@ -24,6 +24,9 @@ permissions:
   coinshop.balance.others:
     description: Allows checking other players' Coin balances
     default: op
+  coinshop.gift:
+    description: Allows gifting Coins to other online players
+    default: true
   coinshop.top:
     description: Allows viewing the top Coin balances
     default: true
@@ -35,6 +38,7 @@ permissions:
     default: op
     children:
       coinshop.balance.others: true
+      coinshop.gift: true
       coinshop.admin.give: true
       coinshop.admin.take: true
       coinshop.admin.set: true

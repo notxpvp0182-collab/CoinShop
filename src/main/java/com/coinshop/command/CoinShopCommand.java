@@ -7,6 +7,7 @@ import com.coinshop.economy.CoinEconomyService;
 import com.coinshop.economy.CurrencyFormatter;
 import com.coinshop.economy.EconomyResponse;
 import com.coinshop.economy.TransactionRecord;
+import com.coinshop.economy.TransferResult;
 import com.coinshop.gui.GuiManager;
 import com.coinshop.logging.TransactionLogger;
 import com.coinshop.shop.ShopItem;
@@ -89,6 +90,7 @@ public final class CoinShopCommand implements CommandExecutor, TabCompleter {
             case "help" -> sendHelp(sender);
             case "shop" -> handleShop(sender, args);
             case "balance", "bal" -> handleBalance(sender, args);
+            case "gift", "pay" -> handleGift(sender, args);
             case "top" -> handleTop(sender);
             case "history" -> handleHistory(sender, args);
             case "give", "add" -> handleGiveTakeSet(sender, args, "GIVE");
@@ -164,6 +166,95 @@ public final class CoinShopCommand implements CommandExecutor, TabCompleter {
                 "%currency%", fmt.getCurrencyName(bal),
                 "%symbol%", fmt.getSymbol()
         ));
+    }
+
+    /**
+     * Handles /coinshop gift <player> <amount> (supports normal numbers, K, M, B).
+     */
+    private void handleGift(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player senderPlayer)) {
+            messageManager.send(sender, "errors.players-only");
+            return;
+        }
+        if (!senderPlayer.hasPermission("coinshop.gift") && !senderPlayer.hasPermission("coinshop.admin")) {
+            messageManager.send(senderPlayer, "errors.no-permission", Map.of("%permission%", "coinshop.gift"));
+            return;
+        }
+        if (args.length < 3) {
+            messageManager.send(senderPlayer, "balance.gift-usage");
+            return;
+        }
+
+        Player receiverPlayer = Bukkit.getPlayerExact(args[1]);
+        if (receiverPlayer == null || !receiverPlayer.isOnline()) {
+            messageManager.send(senderPlayer, "errors.player-not-online", Map.of("%player%", args[1]));
+            return;
+        }
+
+        if (senderPlayer.getUniqueId().equals(receiverPlayer.getUniqueId())) {
+            messageManager.send(senderPlayer, "errors.cannot-gift-self");
+            return;
+        }
+
+        long amount = CurrencyFormatter.parseAmount(args[2]);
+        if (amount <= 0L) {
+            messageManager.send(senderPlayer, "errors.invalid-amount", Map.of("%amount%", args[2]));
+            return;
+        }
+
+        CurrencyFormatter fmt = economyService.getFormatter();
+        TransferResult result = economyService.transfer(
+                senderPlayer.getUniqueId(),
+                senderPlayer.getName(),
+                receiverPlayer.getUniqueId(),
+                receiverPlayer.getName(),
+                amount
+        );
+
+        switch (result.status()) {
+            case SELF_TRANSFER -> messageManager.send(senderPlayer, "errors.cannot-gift-self");
+            case INVALID_AMOUNT -> messageManager.send(senderPlayer, "errors.invalid-amount", Map.of("%amount%", args[2]));
+            case INSUFFICIENT_FUNDS -> messageManager.send(senderPlayer, "balance.gift-insufficient", Map.of(
+                    "%amount_raw%", fmt.formatRaw(amount),
+                    "%amount_formatted%", fmt.formatShort(amount),
+                    "%balance_raw%", fmt.formatRaw(result.senderNewBalance()),
+                    "%balance_formatted%", fmt.formatShort(result.senderNewBalance()),
+                    "%currency%", fmt.getCurrencyName(amount),
+                    "%symbol%", fmt.getSymbol()
+            ));
+            case RECEIVER_OVERFLOW -> messageManager.send(senderPlayer, "balance.overflow");
+            case SUCCESS -> {
+                transactionLogger.logGift(
+                        senderPlayer.getName(),
+                        senderPlayer.getUniqueId(),
+                        receiverPlayer.getName(),
+                        receiverPlayer.getUniqueId(),
+                        amount,
+                        result.senderNewBalance(),
+                        result.receiverNewBalance()
+                );
+
+                messageManager.send(senderPlayer, "balance.gift-sent", Map.of(
+                        "%receiver%", receiverPlayer.getName(),
+                        "%amount_raw%", fmt.formatRaw(amount),
+                        "%amount_formatted%", fmt.formatShort(amount),
+                        "%balance_raw%", fmt.formatRaw(result.senderNewBalance()),
+                        "%balance_formatted%", fmt.formatShort(result.senderNewBalance()),
+                        "%currency%", fmt.getCurrencyName(amount),
+                        "%symbol%", fmt.getSymbol()
+                ));
+
+                messageManager.send(receiverPlayer, "balance.gift-received", Map.of(
+                        "%sender%", senderPlayer.getName(),
+                        "%amount_raw%", fmt.formatRaw(amount),
+                        "%amount_formatted%", fmt.formatShort(amount),
+                        "%balance_raw%", fmt.formatRaw(result.receiverNewBalance()),
+                        "%balance_formatted%", fmt.formatShort(result.receiverNewBalance()),
+                        "%currency%", fmt.getCurrencyName(amount),
+                        "%symbol%", fmt.getSymbol()
+                ));
+            }
+        }
     }
 
     private void handleTop(CommandSender sender) {
@@ -528,6 +619,7 @@ public final class CoinShopCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(TextUtil.colorize("&8 • &#55FFFF/coinshop &7- Open the main CoinShop menu"));
         sender.sendMessage(TextUtil.colorize("&8 • &#55FFFF/coinshop shop <category> &7- Open a specific category"));
         sender.sendMessage(TextUtil.colorize("&8 • &#55FFFF/coinshop balance [player] &7- View exact Coin balance"));
+        sender.sendMessage(TextUtil.colorize("&8 • &#55FFFF/coinshop gift <player> <amount> &7- Gift Coins to a player (100, 1k, 5k, 1m)"));
         sender.sendMessage(TextUtil.colorize("&8 • &#55FFFF/coinshop top &7- View top Coin balances"));
         if (sender.hasPermission("coinshop.admin") || sender.hasPermission("coinshop.editor")) {
             sender.sendMessage(TextUtil.colorize("&8 • &#FFAA00/coinshop give|take|set <player> <amount>"));
@@ -566,6 +658,9 @@ public final class CoinShopCommand implements CommandExecutor, TabCompleter {
             }
             if (sender.hasPermission("coinshop.balance")) {
                 completions.add("balance");
+            }
+            if (sender.hasPermission("coinshop.gift") || sender.hasPermission("coinshop.admin")) {
+                completions.add("gift");
             }
             if (sender.hasPermission("coinshop.top")) {
                 completions.add("top");
@@ -614,6 +709,15 @@ public final class CoinShopCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                 }
+                case "gift", "pay" -> {
+                    if (hasSubPermission(sender, sub)) {
+                        for (Player p : Bukkit.getOnlinePlayers()) {
+                            if (!p.getName().equalsIgnoreCase(sender.getName())) {
+                                completions.add(p.getName());
+                            }
+                        }
+                    }
+                }
                 case "balance", "bal", "give", "take", "set", "history" -> {
                     if (hasSubPermission(sender, sub)) {
                         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -630,6 +734,8 @@ public final class CoinShopCommand implements CommandExecutor, TabCompleter {
                 for (ShopItem item : shopManager.getItems(args[1])) {
                     completions.add(item.getId());
                 }
+            } else if (("gift".equals(sub) || "pay".equals(sub)) && hasSubPermission(sender, sub)) {
+                completions.addAll(List.of("100", "1k", "5k", "10k", "1m"));
             } else if ("addhanditem".equals(sub) && hasSubPermission(sender, sub)) {
                 completions.addAll(List.of("100", "500", "1000", "2500", "5000"));
             } else if (("give".equals(sub) || "take".equals(sub) || "set".equals(sub)) && hasSubPermission(sender, sub)) {
@@ -647,6 +753,7 @@ public final class CoinShopCommand implements CommandExecutor, TabCompleter {
         }
         return switch (sub) {
             case "shop" -> sender.hasPermission("coinshop.use");
+            case "gift", "pay" -> sender.hasPermission("coinshop.gift");
             case "balance", "bal" -> sender.hasPermission("coinshop.balance.others");
             case "history" -> sender.hasPermission("coinshop.history");
             case "give" -> sender.hasPermission("coinshop.admin.give");

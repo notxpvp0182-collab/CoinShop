@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Asynchronous audit logger writing admin balance changes and player shop purchases to transactions.log.
+ * Asynchronous audit logger writing admin balance changes, player gifts, and shop purchases to transactions.log.
  */
 public final class TransactionLogger {
 
@@ -59,6 +59,31 @@ public final class TransactionLogger {
         if (logAdminToConsole) {
             pluginLogger.info(entry);
         }
+        if (logToFile) {
+            writeAsync(entry);
+        }
+    }
+
+    public void logGift(
+            String senderName,
+            UUID senderUuid,
+            String receiverName,
+            UUID receiverUuid,
+            long amount,
+            long senderNewBalance,
+            long receiverNewBalance
+    ) {
+        String entry = String.format(
+                "[%s] [GIFT] Sender=%s (%s) [NewBal=%d] -> Receiver=%s (%s) [NewBal=%d] | Amount=%d",
+                FORMATTER.format(Instant.now()),
+                senderName,
+                senderUuid,
+                senderNewBalance,
+                receiverName,
+                receiverUuid,
+                receiverNewBalance,
+                amount
+        );
         if (logToFile) {
             writeAsync(entry);
         }

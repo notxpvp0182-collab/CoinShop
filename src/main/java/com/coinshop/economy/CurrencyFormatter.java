@@ -7,7 +7,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
 /**
- * Display-only currency formatter.
+ * Display-only currency formatter and human-friendly amount parser (K/M/B).
  * Calculations never use formatted strings; all balances are exact long values.
  */
 public final class CurrencyFormatter {
@@ -48,6 +48,52 @@ public final class CurrencyFormatter {
     }
 
     /**
+     * Parses a user-supplied amount string supporting plain numbers and K, M, B suffixes
+     * (e.g. "100" -> 100, "1k" -> 1000, "5K" -> 5000, "1.5k" -> 1500, "1m" -> 1000000, "2b" -> 2000000000).
+     * Returns -1L if the input is invalid, non-positive, fractional Coin, or overflows a long.
+     */
+    public static long parseAmount(String rawInput) {
+        if (rawInput == null) {
+            return -1L;
+        }
+        String cleaned = rawInput.trim().replace(",", "");
+        if (cleaned.isEmpty() || cleaned.startsWith("-") || cleaned.startsWith("+")) {
+            return -1L;
+        }
+
+        long multiplier = 1L;
+        char lastChar = Character.toUpperCase(cleaned.charAt(cleaned.length() - 1));
+        String numberPart = cleaned;
+
+        if (lastChar == 'K') {
+            multiplier = 1_000L;
+            numberPart = cleaned.substring(0, cleaned.length() - 1).trim();
+        } else if (lastChar == 'M') {
+            multiplier = 1_000_000L;
+            numberPart = cleaned.substring(0, cleaned.length() - 1).trim();
+        } else if (lastChar == 'B') {
+            multiplier = 1_000_000_000L;
+            numberPart = cleaned.substring(0, cleaned.length() - 1).trim();
+        }
+
+        if (numberPart.isEmpty()) {
+            return -1L;
+        }
+
+        try {
+            BigDecimal decimal = new BigDecimal(numberPart);
+            if (decimal.compareTo(BigDecimal.ZERO) <= 0) {
+                return -1L;
+            }
+            BigDecimal multiplied = decimal.multiply(BigDecimal.valueOf(multiplier));
+            long exact = multiplied.longValueExact();
+            return exact > 0L ? exact : -1L;
+        } catch (NumberFormatException | ArithmeticException ex) {
+            return -1L;
+        }
+    }
+
+    /**
      * Returns the exact numeric value, optionally with thousand separators (e.g. 1,500,000).
      */
     public String formatRaw(long amount) {
@@ -59,7 +105,6 @@ public final class CurrencyFormatter {
 
     /**
      * Formats numbers into compact human-readable strings (e.g., 999 -> "999", 1000 -> "1K", 1499 -> "1.4K", 1500 -> "1.5K", 1000000 -> "1M").
-     * Uses FLOOR truncation to 1 decimal place so a player with 1,499 coins is never misled into thinking they have 1.5K (1,500).
      */
     public String formatShort(long amount) {
         if (amount < 0) {

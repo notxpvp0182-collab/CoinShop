@@ -24,10 +24,9 @@ import java.util.stream.Collectors;
  *
  * Concurrency & Safety Guarantees:
  * - Per-UUID ReentrantLock prevents race conditions and double-spending.
- * - Rejects negative or zero amounts for deposit/withdraw.
+ * - Deterministic lock ordering on transfers prevents deadlocks when two players gift each other simultaneously.
+ * - Rejects negative or zero amounts for deposit/withdraw/transfer.
  * - Rejects negative balances and arithmetic overflow above maxBalance.
- * - Persists balance updates synchronously inside the per-UUID lock if strict durability is required,
- *   or asynchronously via a dedicated single-thread persistence executor while maintaining in-memory cache consistency.
  */
 public final class CoinEconomyService {
 
@@ -208,6 +207,109 @@ public final class CoinEconomyService {
             return EconomyResponse.success(current, newBalance, diff);
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * Atomically transfers Coins from senderUuid to receiverUuid.
+     * Uses ordered dual-lock acquisition to prevent deadlocks and race conditions.
+     */
+    public TransferResult transfer(
+            UUID senderUuid,
+            String senderName,
+            UUID receiverUuid,
+            String receiverName,
+            long amount
+    ) {
+        Objects.requireNonNull(senderUuid, "senderUuid");
+        Objects.requireNonNull(receiverUuid, "receiverUuid");
+
+        if (senderUuid.equals(receiverUuid)) {
+            long bal = getBalance(senderUuid);
+            return new TransferResult(TransferResult.Status.SELF_TRANSFER, 0L, bal, bal);
+        }
+        if (amount <= 0L) {
+            return new TransferResult(
+                    TransferResult.Status.INVALID_AMOUNT,
+                    0L,
+                    getBalance(senderUuid),
+                    getBalance(receiverUuid)
+            );
+        }
+
+        // Deterministic lock order prevents deadlocks if A gifts B while B gifts A
+        UUID first = senderUuid.compareTo(receiverUuid) < 0 ? senderUuid : receiverUuid;
+        UUID second = first.equals(senderUuid) ? receiverUuid : senderUuid;
+
+        ReentrantLock firstLock = getLock(first);
+        ReentrantLock secondLock = getLock(second);
+
+        firstLock.lock();
+        try {
+            secondLock.lock();
+            try {
+                long senderBefore = getBalance(senderUuid);
+                long receiverBefore = getBalance(receiverUuid);
+
+                if (senderBefore < amount) {
+                    return new TransferResult(
+                            TransferResult.Status.INSUFFICIENT_FUNDS,
+                            amount,
+                            senderBefore,
+                            receiverBefore
+                    );
+                }
+
+                long receiverAfter;
+                try {
+                    receiverAfter = Math.addExact(receiverBefore, amount);
+                } catch (ArithmeticException ex) {
+                    return new TransferResult(
+                            TransferResult.Status.RECEIVER_OVERFLOW,
+                            amount,
+                            senderBefore,
+                            receiverBefore
+                    );
+                }
+
+                if (receiverAfter > maxBalance) {
+                    return new TransferResult(
+                            TransferResult.Status.RECEIVER_OVERFLOW,
+                            amount,
+                            senderBefore,
+                            receiverBefore
+                    );
+                }
+
+                long senderAfter = senderBefore - amount;
+                balanceCache.put(senderUuid, senderAfter);
+                balanceCache.put(receiverUuid, receiverAfter);
+
+                persistAsync(
+                        senderUuid,
+                        senderName,
+                        senderAfter,
+                        "GIFT_SENT",
+                        amount,
+                        senderBefore,
+                        "Gifted to " + (receiverName != null ? receiverName : receiverUuid)
+                );
+                persistAsync(
+                        receiverUuid,
+                        receiverName,
+                        receiverAfter,
+                        "GIFT_RECEIVED",
+                        amount,
+                        receiverBefore,
+                        "Received from " + (senderName != null ? senderName : senderUuid)
+                );
+
+                return new TransferResult(TransferResult.Status.SUCCESS, amount, senderAfter, receiverAfter);
+            } finally {
+                secondLock.unlock();
+            }
+        } finally {
+            firstLock.unlock();
         }
     }
 
