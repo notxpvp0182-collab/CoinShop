@@ -1,0 +1,70 @@
+name: CoinShop
+version: '${project.version}'
+main: com.coinshop.CoinShopPlugin
+api-version: '1.21'
+authors: [CoinShopTeam]
+description: Dedicated Coin Economy and Multi-Category GUI Shop with In-Game Editor
+softdepend:
+  - PlaceholderAPI
+  - Essentials
+
+commands:
+  coinshop:
+    description: Main CoinShop command
+    aliases: [cshop, coins, cs]
+    usage: /coinshop [shop|balance|help|top|history|give|take|set|addcategory|removecategory|addhanditem|edititem|removeitem|editor|reload|validate|info]
+
+permissions:
+  coinshop.use:
+    description: Allows opening the CoinShop GUI and buying permitted items
+    default: true
+  coinshop.balance:
+    description: Allows checking own Coin balance
+    default: true
+  coinshop.balance.others:
+    description: Allows checking other players' Coin balances
+    default: op
+  coinshop.top:
+    description: Allows viewing the top Coin balances
+    default: true
+  coinshop.history:
+    description: Allows viewing recent Coin transactions
+    default: op
+  coinshop.admin:
+    description: Grants access to all CoinShop admin functions
+    default: op
+    children:
+      coinshop.balance.others: true
+      coinshop.admin.give: true
+      coinshop.admin.take: true
+      coinshop.admin.set: true
+      coinshop.admin.category: true
+      coinshop.admin.item: true
+      coinshop.editor: true
+      coinshop.reload: true
+      coinshop.validate: true
+      coinshop.history: true
+  coinshop.admin.give:
+    description: Allows giving Coins to players
+    default: op
+  coinshop.admin.take:
+    description: Allows taking Coins from players
+    default: op
+  coinshop.admin.set:
+    description: Allows setting a player's Coin balance
+    default: op
+  coinshop.admin.category:
+    description: Allows creating and removing shop categories
+    default: op
+  coinshop.admin.item:
+    description: Allows adding, editing, and removing shop items
+    default: op
+  coinshop.editor:
+    description: Allows using the in-game GUI editor
+    default: op
+  coinshop.reload:
+    description: Allows reloading and validating CoinShop configuration
+    default: op
+  coinshop.validate:
+    description: Allows validating categories and shops
+    default: op

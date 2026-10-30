@@ -1,0 +1,38 @@
+items:
+  gold_chat_color:
+    slot: 11
+    page: 1
+    price: 1500
+    amount: 1
+    material: "GOLD_INGOT"
+    display-name: "&#FFAA00&lGold Chat Color"
+    lore:
+      - "&7Unlocks the &#FFAA00Gold &7chat color"
+      - "&7permanently on this server."
+    permission: ""
+    reward-type: "COMMAND"
+    commands:
+      - "lp user %player% permission set chatcolor.gold true"
+    stock-limit: -1
+    player-limit: 1
+    cooldown-seconds: 0
+    require-confirmation: true
+
+  aqua_chat_color:
+    slot: 15
+    page: 1
+    price: 1500
+    amount: 1
+    material: "DIAMOND"
+    display-name: "&#55FFFF&lAqua Chat Color"
+    lore:
+      - "&7Unlocks the &#55FFFFAqua &7chat color"
+      - "&7permanently on this server."
+    permission: ""
+    reward-type: "COMMAND"
+    commands:
+      - "lp user %player% permission set chatcolor.aqua true"
+    stock-limit: -1
+    player-limit: 1
+    cooldown-seconds: 0
+    require-confirmation: true

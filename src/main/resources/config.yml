@@ -1,0 +1,102 @@
+# ============================================================================
+# CoinShop Configuration (v1.0.0)
+# Compatible with Paper 1.21.x and 26.x (Java 21 & Java 25)
+# ============================================================================
+config-version: 1
+
+storage:
+  # Supported types: SQLITE, YAML
+  # SQLITE is strongly recommended for atomic transactions and concurrency safety.
+  type: SQLITE
+  sqlite-file: "database.db"
+  yaml-file: "balances.yml"
+
+currency:
+  singular-name: "Coin"
+  plural-name: "Coins"
+  symbol: "⛃"
+  starting-balance: 0
+  max-balance: 9000000000000000
+  format:
+    use-thousand-separators: true
+    suffixes:
+      thousand: "K"
+      million: "M"
+      billion: "B"
+      trillion: "T"
+
+style:
+  # When true, converts supported ASCII headings/labels via SmallCapsConverter
+  # Client resource packs are NOT required; uses standard Unicode small-caps glyphs.
+  use-small-caps: true
+  primary-color: "&#FFAA00"
+  secondary-color: "&#55FFFF"
+  neutral-color: "&#AAAAAA"
+  dark-color: "&#555555"
+
+main-menu:
+  title: "&8✦ &#FFAA00ᴄᴏɪɴ ꜱʜᴏᴘ &8✦"
+  size: 45
+  filler:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+  balance-item:
+    enabled: true
+    slot: 40
+    material: SUNFLOWER
+    name: "&#FFAA00&lʏᴏᴜʀ ʙᴀʟᴀɴᴄᴇ"
+    lore:
+      - "&8⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"
+      - "&7Exact: &#55FFFF%balance_raw% %currency%"
+      - "&7Short: &#FFAA00%symbol%%balance_formatted%"
+      - "&8⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"
+  close-button:
+    enabled: true
+    slot: 44
+    material: BARRIER
+    name: "&#FF5555&lᴄʟᴏꜱᴇ"
+    lore:
+      - "&7Click to close this menu."
+
+shop-defaults:
+  confirm-threshold: 1000
+  confirm-gui-title: "&8✦ &#FFAA00ᴄᴏɴꜰɪʀᴍ ᴘᴜʀᴄʜᴀꜱᴇ &8✦"
+  purchase-cooldown-ms: 350
+  navigation:
+    previous-page-slot: 45
+    previous-page-material: ARROW
+    previous-page-name: "&#FFAA00« ᴘʀᴇᴠɪᴏᴜꜱ ᴘᴀɢᴇ"
+    back-slot: 49
+    back-material: DARK_OAK_DOOR
+    back-name: "&#FF5555« ʙᴀᴄᴋ ᴛᴏ ᴄᴀᴛᴇɢᴏʀɪᴇꜱ"
+    next-page-slot: 53
+    next-page-material: ARROW
+    next-page-name: "&#FFAA00ɴᴇxᴛ ᴘᴀɢᴇ »"
+  lore-format:
+    - "%item_lore%"
+    - "&8⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"
+    - "&7Price: &#FFAA00%symbol%%price_formatted% &8(&f%price_raw% %currency%&8)"
+    - "&7Your Balance: &#55FFFF%balance_formatted%"
+    - "%stock_line%"
+    - "%limit_line%"
+    - ""
+    - "%action_prompt%"
+  prompts:
+    available: "&#55FF55▸ ᴄʟɪᴄᴋ ᴛᴏ ᴘᴜʀᴄʜᴀꜱᴇ"
+    unset-price: "&#FF5555✖ ᴜɴᴀᴠᴀɪʟᴀʙʟᴇ (ᴘʀɪᴄᴇ ᴜɴꜱᴇᴛ)"
+    no-permission: "&#FF5555✖ ʟᴏᴄᴋᴇᴅ (ɴᴏ ᴘᴇʀᴍɪꜱꜱɪᴏɴ)"
+    out-of-stock: "&#FF5555✖ ᴏᴜᴛ ᴏꜰ ꜱᴛᴏᴄᴋ"
+    limit-reached: "&#FF5555✖ ᴘᴜʀᴄʜᴀꜱᴇ ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ"
+    insufficient-funds: "&#FF5555✖ ɴᴏᴛ ᴇɴᴏᴜɢʜ ᴄᴏɪɴꜱ"
+
+sounds:
+  open-menu: "UI_BUTTON_CLICK"
+  purchase-success: "ENTITY_EXPERIENCE_ORB_PICKUP"
+  purchase-fail: "ENTITY_VILLAGER_NO"
+  editor-click: "UI_BUTTON_CLICK"
+  editor-save: "BLOCK_ANVIL_USE"
+
+logging:
+  log-transactions-to-file: true
+  log-admin-actions-to-console: true

@@ -1,0 +1,21 @@
+id: "spawners"
+enabled: true
+display-name: "&#FFAA00&lᴍᴏʙ ꜱᴘᴀᴡɴᴇʀꜱ"
+material: "SPAWNER"
+slot: 20
+permission: ""
+hide-if-no-permission: false
+shop-file: "spawners.yml"
+gui-title: "&8✦ &#FFAA00ꜱᴘᴀᴡɴᴇʀ ꜱʜᴏᴘ &8(&7Page %page%&8) ✦"
+gui-size: 54
+filler:
+  enabled: true
+  material: "GRAY_STAINED_GLASS_PANE"
+  name: " "
+lore:
+  - "&8⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"
+  - "&7Purchase premium monster spawners"
+  - "&7using your hard-earned &#FFAA00Coins&7."
+  - ""
+  - "&#55FFFF▸ ᴄʟɪᴄᴋ ᴛᴏ ʙʀᴏᴡꜱᴇ"
+  - "&8⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"

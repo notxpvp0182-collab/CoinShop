@@ -1,0 +1,21 @@
+id: "chat-color"
+enabled: true
+display-name: "&#55FFFF&lᴄʜᴀᴛ ᴄᴏʟᴏʀꜱ & ᴘᴇʀᴋꜱ"
+material: "NAME_TAG"
+slot: 24
+permission: ""
+hide-if-no-permission: false
+shop-file: "chat-color.yml"
+gui-title: "&8✦ &#55FFFFᴄʜᴀᴛ ᴄᴏʟᴏʀ ꜱʜᴏᴘ &8(&7Page %page%&8) ✦"
+gui-size: 54
+filler:
+  enabled: true
+  material: "BLACK_STAINED_GLASS_PANE"
+  name: " "
+lore:
+  - "&8⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"
+  - "&7Stand out in chat with exclusive"
+  - "&7colors, tags, and server perks."
+  - ""
+  - "&#55FFFF▸ ᴄʟɪᴄᴋ ᴛᴏ ʙʀᴏᴡꜱᴇ"
+  - "&8⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯"

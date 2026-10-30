@@ -1,0 +1,36 @@
+items:
+  iron_golem_spawner:
+    slot: 10
+    page: 1
+    price: 5000
+    amount: 1
+    material: "SPAWNER"
+    display-name: "&#FFAA00&lIron Golem Spawner"
+    lore:
+      - "&7Place this spawner on your island"
+      - "&7to generate Iron Golems."
+    permission: ""
+    reward-type: "BOTH"
+    commands:
+      - "give %player% spawner 1"
+    stock-limit: -1
+    player-limit: 5
+    cooldown-seconds: 5
+    require-confirmation: true
+
+  blaze_spawner:
+    slot: 12
+    page: 1
+    price: 2500
+    amount: 1
+    material: "SPAWNER"
+    display-name: "&#FF5555&lBlaze Spawner"
+    lore:
+      - "&7High-efficiency Nether Blaze spawner."
+    permission: ""
+    reward-type: "ITEM"
+    commands: []
+    stock-limit: -1
+    player-limit: -1
+    cooldown-seconds: 2
+    require-confirmation: true
